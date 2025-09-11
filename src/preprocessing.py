@@ -2,6 +2,8 @@ import re
 import unicodedata
 from typing import List, Optional
 
+import numpy as np
+
 # Constants
 NUMBER_WORDS = {
     "one": "1",
@@ -15,7 +17,21 @@ NUMBER_WORDS = {
     "nine": "9",
 }
 
-STOPWORDS = {"and", "with", "the", "a", "an", "of", "for", "in", "at", "to", "by", "on"}
+STOPWORDS = {
+    "and",
+    "with",
+    "the",
+    "a",
+    "an",
+    "of",
+    "for",
+    "in",
+    "at",
+    "to",
+    "by",
+    "on",
+    "or",
+}
 
 REPLACEMENTS = [
     (r"&", " and "),
@@ -79,45 +95,32 @@ def tokenize(text: str) -> List[str]:
 
 # Feature extractors
 def extract_room_type(text: str) -> Optional[str]:
-    """
-    Extract room type keyword (suite, apartment, loft, room) from
-    normalized text.
-    """
+    """Extract room type keyword (suite, apartment, loft, room)."""
     match = re.search(r"\b(house|suite|apartment|loft|room)\b", text)
-    return match.group(1) if match else None
+    return match.group(1) if match else np.nan
 
 
 def extract_bed_type(tokens: List[str]) -> Optional[str]:
-    """
-    Extract bed type (king, twin, double, queen) if followed by the token
-    'bed'.
-    Example: ['1','king','bed'] -> 'king'
-    """
+    """Extract bed type (king, twin, double, queen) if followed by 'bed'."""
     bed_types = {"king", "twin", "double", "queen"}
     for i, tok in enumerate(tokens):
         if tok in bed_types and i + 1 < len(tokens) and tokens[i + 1] == "bed":
             return tok
-    return None
+    return np.nan
 
 
 def extract_beds(tokens: List[str]) -> Optional[int]:
-    """
-    Extract number of beds (e.g., '2 twin bed' -> 2).
-    Looks for a digit immediately before a bed type token.
-    """
+    """Extract number of beds (e.g., '2 twin bed' -> 2)."""
     bed_types = {"king", "twin", "double", "queen"}
     for i, tok in enumerate(tokens):
         if tok in bed_types and i > 0 and tokens[i - 1].isdigit():
             return int(tokens[i - 1])
-    return None
+    return np.nan
 
 
 def extract_bedroom_count(tokens: List[str]) -> Optional[int]:
-    """
-    Extract number of bedrooms (e.g., '2 bedroom' -> 2).
-    Looks for a digit immediately before the token 'bedroom'.
-    """
+    """Extract number of bedrooms (e.g., '2 bedroom' -> 2)."""
     for i, tok in enumerate(tokens):
         if tok == "bedroom" and i > 0 and tokens[i - 1].isdigit():
             return int(tokens[i - 1])
-    return None
+    return np.nan
