@@ -1,0 +1,123 @@
+import re
+import unicodedata
+from typing import List, Optional
+
+# Constants
+NUMBER_WORDS = {
+    "one": "1",
+    "two": "2",
+    "three": "3",
+    "four": "4",
+    "five": "5",
+    "six": "6",
+    "seven": "7",
+    "eight": "8",
+    "nine": "9",
+}
+
+STOPWORDS = {"and", "with", "the", "a", "an", "of", "for", "in", "at", "to", "by", "on"}
+
+REPLACEMENTS = [
+    (r"&", " and "),
+    (r"\+", " and "),
+    (r"\bking bed(s)?\b", "king bed"),
+    (r"\btwin bed(s)?\b", "twin bed"),
+    (r"\bdouble bed(s)?\b", "double bed"),
+    (r"\bqueen bed(s)?\b", "queen bed"),
+]
+
+
+# String-level normalization
+def strip_accents(text: str) -> str:
+    """Remove accents/diacritics from a string."""
+    return "".join(
+        ch
+        for ch in unicodedata.normalize("NFKD", text)
+        if not unicodedata.combining(ch)
+    )
+
+
+def normalize(text: str) -> str:
+    """
+    Lowercase, strip accents, apply replacements, remove punctuation,
+    collapse spaces.
+    """
+    s = text.strip().lower()
+    s = strip_accents(s)
+
+    # number words -> digits
+    for word, digit in NUMBER_WORDS.items():
+        s = re.sub(rf"\b{word}\b", digit, s)
+
+    # pattern replacements
+    for pat, rep in REPLACEMENTS:
+        s = re.sub(pat, rep, s)
+
+    # remove punctuation
+    s = re.sub(r"[^\w\s]", " ", s)
+
+    # collapse whitespace
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+# Tokenization
+def split_tokens(text: str) -> List[str]:
+    """Normalize text and split into tokens (keeps stopwords)."""
+    return normalize(text).split()
+
+
+def remove_stopwords(tokens: List[str]) -> List[str]:
+    """Remove stopwords from a list of tokens."""
+    return [t for t in tokens if t not in STOPWORDS]
+
+
+def tokenize(text: str) -> List[str]:
+    """Normalize, split, and remove stopwords in one step."""
+    return remove_stopwords(split_tokens(text))
+
+
+# Feature extractors
+def extract_room_type(text: str) -> Optional[str]:
+    """
+    Extract room type keyword (suite, apartment, loft, room) from
+    normalized text.
+    """
+    match = re.search(r"\b(house|suite|apartment|loft|room)\b", text)
+    return match.group(1) if match else None
+
+
+def extract_bed_type(tokens: List[str]) -> Optional[str]:
+    """
+    Extract bed type (king, twin, double, queen) if followed by the token
+    'bed'.
+    Example: ['1','king','bed'] -> 'king'
+    """
+    bed_types = {"king", "twin", "double", "queen"}
+    for i, tok in enumerate(tokens):
+        if tok in bed_types and i + 1 < len(tokens) and tokens[i + 1] == "bed":
+            return tok
+    return None
+
+
+def extract_beds(tokens: List[str]) -> Optional[int]:
+    """
+    Extract number of beds (e.g., '2 twin bed' -> 2).
+    Looks for a digit immediately before a bed type token.
+    """
+    bed_types = {"king", "twin", "double", "queen"}
+    for i, tok in enumerate(tokens):
+        if tok in bed_types and i > 0 and tokens[i - 1].isdigit():
+            return int(tokens[i - 1])
+    return None
+
+
+def extract_bedroom_count(tokens: List[str]) -> Optional[int]:
+    """
+    Extract number of bedrooms (e.g., '2 bedroom' -> 2).
+    Looks for a digit immediately before the token 'bedroom'.
+    """
+    for i, tok in enumerate(tokens):
+        if tok == "bedroom" and i > 0 and tokens[i - 1].isdigit():
+            return int(tokens[i - 1])
+    return None

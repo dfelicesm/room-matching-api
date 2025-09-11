@@ -2,3 +2,8 @@
 data/*
 !data/.gitkeep
 !output/.gitkeep
+
+
+# Ignore Python cache
+__pycache__/
+*.py[cod]
