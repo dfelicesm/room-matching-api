@@ -4,7 +4,6 @@ from typing import List, Optional
 
 import numpy as np
 
-# Constants
 NUMBER_WORDS = {
     "one": "1",
     "two": "2",
@@ -43,7 +42,6 @@ REPLACEMENTS = [
 ]
 
 
-# String-level normalization
 def strip_accents(text: str) -> str:
     """Remove accents/diacritics from a string."""
     return "".join(
@@ -77,7 +75,6 @@ def normalize(text: str) -> str:
     return s
 
 
-# Tokenization
 def split_tokens(text: str) -> List[str]:
     """Normalize text and split into tokens (keeps stopwords)."""
     return normalize(text).split()
@@ -93,7 +90,6 @@ def tokenize(text: str) -> List[str]:
     return remove_stopwords(split_tokens(text))
 
 
-# Feature extractors
 def extract_room_type(text: str) -> Optional[str]:
     """Extract room type keyword (suite, apartment, loft, room)."""
     match = re.search(r"\b(house|suite|apartment|loft|room)\b", text)

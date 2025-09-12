@@ -2,7 +2,7 @@ from typing import Optional
 
 import pandas as pd
 
-from config import PRECOMPUTED_PATH, RAW_PATH
+from src.config import PRECOMPUTED_PATH, RAW_PATH
 
 
 def load_internal_raw(path: Optional[str] = RAW_PATH) -> pd.DataFrame:

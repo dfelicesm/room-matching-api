@@ -1,8 +1,8 @@
 import pandas as pd
 
-from config import PRECOMPUTED_PATH
-from load_data import load_internal_raw
-from preprocessing import (
+from src.config import PRECOMPUTED_PATH
+from src.load_data import load_internal_raw
+from src.preprocessing import (
     extract_bed_type,
     extract_bedroom_count,
     extract_beds,
@@ -45,11 +45,12 @@ def save_precomputed(df: pd.DataFrame, path: str = PRECOMPUTED_PATH) -> None:
     df.to_csv(path, index=False)
 
 
-def main() -> None:
+def build_precomputed_catalog(path: str = PRECOMPUTED_PATH) -> None:
+    """Load raw data, compute features, and save precomputed catalog."""
     raw = load_internal_raw()
-    precomputed = compute_features(raw)
-    save_precomputed(precomputed)
+    pre = compute_features(raw)
+    save_precomputed(pre, path)
 
 
 if __name__ == "__main__":
-    main()
+    build_precomputed_catalog()
