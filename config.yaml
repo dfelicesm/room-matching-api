@@ -1,10 +1,3 @@
 data:
   raw_path: data/referance_rooms-1737378184366.csv
   precomputed_path: data/internal_catalog.csv
-
-matching:
-  top_k: 5  # number of candidates to return
-
-api:
-  host: 0.0.0.0
-  port: 8000
