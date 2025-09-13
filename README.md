@@ -24,7 +24,7 @@ uvicorn src.api:app --reload
 ```
 
 #### 3. Test the API
-Open your browser at `http://127.0.0.1:8000/docs` to test the `/match`endpoint using Swagger. 
+Open your browser at `http://127.0.0.1:8000/docs` to test the `/match`endpoint using Swagger. There are some examples of rooms and hotels in the data folder.
 
 ### Using Docker
 #### 1. Build the image
